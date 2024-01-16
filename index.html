@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>CALCULATOR</h1>
+  <div class="container">
+    <input type="text" id="userInput" />
+    <div id="result"></div>
+    <input type="button" class="del" value="1" onclick="addToDisplay('1')">
+        <input type="button" class="del" value="2" onclick="addToDisplay('2')">
+        <input type="button" class="del" value="3" onclick="addToDisplay('3')">
+        <input type="button" class="del" value="/" onclick="addToDisplay('/')">
+        <br>
+    
+        <input type="button" class="del" value="4" onclick="addToDisplay('4')">
+        <input type="button" class="del" value="5" onclick="addToDisplay('5')">
+        <input type="button" class="del" value="6" onclick="addToDisplay('6')">
+        <input type="button" class="del" value="-" onclick="addToDisplay('-')">
+        <br>
+    
+        <input type="button" class="del" value="7" onclick="addToDisplay('7')">
+        <input type="button" class="del" value="8" onclick="addToDisplay('8')">
+        <input type="button" class="del" value="9" onclick="addToDisplay('9')">
+        <input type="button" class="del" value="+" onclick="addToDisplay('+')">
+        <br>
+    
+        <input type="button" class="del" value="0" onclick="addToDisplay('0')">
+        <input type="button" class="del" value="." onclick="addToDisplay('.')">
+        <input type="button" class="del" value="*" onclick="addToDisplay('*')">
+        <input type="button" class="del" value="=" id="calculate">
+        <br>
+        <input type="button" class="dele"  value="DEL" onclick="deletee()">
+        <input type="button" id="clear"  value="Clear">
+        <br>
+      </div>
+
+    <script>
+
+      function* tokenize(s) {
+        let token = "";
+        for (const character of s.slice(0, -1)) {
+          if ("^*/+-".includes(character) && token !== "") {
+            yield parseFloat(token);
+            yield character;
+            token = "";
+          } else {
+            token += character;
+          }
+        }
+        yield parseFloat(token + s.at(-1));
+      }
+
+      function calculateOperators(tokens, operators) {
+        const r = [];
+        let operator;
+        for (const token of tokens) {
+          if (token in operators) {
+            operator = operators[token];
+          } else if (operator) {
+            r[r.length - 1] = operator(r[r.length - 1], token);
+            operator = null;
+          } else {
+            r.push(token);
+          }
+        }
+        return r;
+      }
+
+      function calculate(tokens) {
+        const precedence = [{
+            '^': (a, b) => Math.pow(a, b)
+          },
+          {
+            '*': (a, b) => a * b,
+            '/': (a, b) => a / b
+          },
+          {
+            '+': (a, b) => a + b,
+            '-': (a, b) => a - b
+          }
+        ];
+        tokens = precedence.reduce(calculateOperators, tokens);
+        if (tokens.length === 1) {
+        	return tokens[0];
+        } else {
+          throw new Error(`Unable to resolve calculation ${tokens}`);
+        }
+      }
+      const calculateButton = document.getElementById('calculate');
+      const userInput = document.getElementById('userInput');
+      const result = document.getElementById('result');
+      calculateButton.addEventListener('click', function() {
+        userInput.value = calculate(tokenize(userInput.value));
+      });
+
+      function addToDisplay(int){
+          userInput.value +=int;
+      }
+      function deletee(){
+        userInput.value = userInput.value.slice(0,-1)
+      }
+
+      document.getElementById('clear').addEventListener('click',() =>{
+        userInput.value =''
+      })
+      
+    </script>
+        </body>
+        </html>
