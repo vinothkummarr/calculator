@@ -1,114 +1,104 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculator</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>CALCULATOR</h1>
-  <div class="container">
-    <input type="text" id="userInput" />
-    <div id="result"></div>
-    <input type="button" class="del" value="1" onclick="addToDisplay('1')">
-        <input type="button" class="del" value="2" onclick="addToDisplay('2')">
-        <input type="button" class="del" value="3" onclick="addToDisplay('3')">
-        <input type="button" class="del" value="/" onclick="addToDisplay('/')">
-        <br>
+    <h1>CALCULATOR</h1>
+    <div class="container">
+    <input type="text" id="result" readonly>
+    <br>
+    <button class="del" onclick="appendToDisplay('1')">1</button>
+    <button class="del" onclick="appendToDisplay('2')">2</button>
+    <button class="del" onclick="appendToDisplay('3')">3</button>
+    <button class="del" onclick="appendToDisplay('+')">+</button>
+    <br>
+    <button class="del" onclick="appendToDisplay('4')">4</button>
+    <button class="del" onclick="appendToDisplay('5')">5</button>
+    <button class="del" onclick="appendToDisplay('6')">6</button>
+    <button class="del" onclick="appendToDisplay('-')">-</button>
+    <br>
+    <button class="del" onclick="appendToDisplay('7')">7</button>
+    <button class="del" onclick="appendToDisplay('8')">8</button>
+    <button class="del" onclick="appendToDisplay('9')">9</button>
+    <button class="del" onclick="appendToDisplay('*')">*</button>
+    <br>
+    <button class="del" onclick="appendToDisplay('0')">0</button>
+    <button class="del" onclick="appendToDisplay('.')">.</button>
+    <button class="del" onclick="appendToDisplay('/')">/</button>
+    <button class="del" onclick="calculateResult()">=</button>
     
-        <input type="button" class="del" value="4" onclick="addToDisplay('4')">
-        <input type="button" class="del" value="5" onclick="addToDisplay('5')">
-        <input type="button" class="del" value="6" onclick="addToDisplay('6')">
-        <input type="button" class="del" value="-" onclick="addToDisplay('-')">
-        <br>
+    <br>
+    <button class="dele" onclick="deletee()">DEL</button>
+    <button class="dele" id="clear" onclick="clearResult()">C</button>
+  </div>
+
+  <script>
+    const userInput = document.querySelector('#result')
+    function appendToDisplay(value) {
+      document.getElementById('result').value += value;
+    }
     
-        <input type="button" class="del" value="7" onclick="addToDisplay('7')">
-        <input type="button" class="del" value="8" onclick="addToDisplay('8')">
-        <input type="button" class="del" value="9" onclick="addToDisplay('9')">
-        <input type="button" class="del" value="+" onclick="addToDisplay('+')">
-        <br>
-    
-        <input type="button" class="del" value="0" onclick="addToDisplay('0')">
-        <input type="button" class="del" value="." onclick="addToDisplay('.')">
-        <input type="button" class="del" value="*" onclick="addToDisplay('*')">
-        <input type="button" class="del" value="=" id="calculate">
-        <br>
-        <input type="button" class="dele"  value="DEL" onclick="deletee()">
-        <input type="button" id="clear"  value="Clear">
-        <br>
-      </div>
+    function clearResult() {
+      document.getElementById('result').value = '';
+    }
 
-    <script>
-
-      function* tokenize(s) {
-        let token = "";
-        for (const character of s.slice(0, -1)) {
-          if ("^*/+-".includes(character) && token !== "") {
-            yield parseFloat(token);
-            yield character;
-            token = "";
-          } else {
-            token += character;
-          }
-        }
-        yield parseFloat(token + s.at(-1));
-      }
-
-      function calculateOperators(tokens, operators) {
-        const r = [];
-        let operator;
-        for (const token of tokens) {
-          if (token in operators) {
-            operator = operators[token];
-          } else if (operator) {
-            r[r.length - 1] = operator(r[r.length - 1], token);
-            operator = null;
-          } else {
-            r.push(token);
-          }
-        }
-        return r;
-      }
-
-      function calculate(tokens) {
-        const precedence = [{
-            '^': (a, b) => Math.pow(a, b)
-          },
-          {
-            '*': (a, b) => a * b,
-            '/': (a, b) => a / b
-          },
-          {
-            '+': (a, b) => a + b,
-            '-': (a, b) => a - b
-          }
-        ];
-        tokens = precedence.reduce(calculateOperators, tokens);
-        if (tokens.length === 1) {
-        	return tokens[0];
-        } else {
-          throw new Error(`Unable to resolve calculation ${tokens}`);
-        }
-      }
-      const calculateButton = document.getElementById('calculate');
-      const userInput = document.getElementById('userInput');
-      const result = document.getElementById('result');
-      calculateButton.addEventListener('click', function() {
-        userInput.value = calculate(tokenize(userInput.value));
-      });
-
-      function addToDisplay(int){
-          userInput.value +=int;
-      }
-      function deletee(){
+    function deletee(){
         userInput.value = userInput.value.slice(0,-1)
       }
-
-      document.getElementById('clear').addEventListener('click',() =>{
-        userInput.value =''
-      })
-      
-    </script>
-        </body>
-        </html>
+    
+    function calculateResult() {
+      const resultField = document.getElementById('result');
+      const expression = resultField.value;
+    
+      try {
+        const result = evalExpression(expression);
+        resultField.value = result;
+      } catch (error) {
+        resultField.value = 'Error';
+      }
+    }
+    
+    function evalExpression(expression) {
+      const operators = ['+', '-', '*', '/'];
+      const values = expression.split(/[\+\-\*\/]/);
+      const operatorsArray = expression.split('').filter(char => operators.includes(char));
+    
+      let result = parseFloat(values[0]);
+    
+      for (let i = 0; i < operatorsArray.length; i++) {
+        const nextValue = parseFloat(values[i + 1]);
+    
+        if (isNaN(nextValue)) {
+          throw new Error('Invalid expression');
+        }
+    
+        switch (operatorsArray[i]) {
+          case '+':
+            result += nextValue;
+            break;
+          case '-':
+            result -= nextValue;
+            break;
+          case '*':
+            result *= nextValue;
+            break;
+          case '/':
+            if (nextValue === 0) {
+              throw new Error('Division by zero');
+            }
+            result /= nextValue;
+            break;
+          default:
+            throw new Error('Invalid operator');
+        }
+      }
+    
+      return result;
+    }
+  </script>
+</body>
+</html>
